@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+set -e
+
+echo "==> Starting EndeavourOS bootstrap..."
+
+# Install packages via pacman
+echo "==> Installing packages via pacman..."
+sudo pacman -S --needed --noconfirm git docker docker-compose curl bash-completion jq
+
+# Install packages via yay (AUR)
+echo "==> Installing AUR packages via yay..."
+yay -S --needed --noconfirm spotify slack-desktop visual-studio-code-bin mise lazydocker
+
+# Install Claude via curl
+echo "==> Installing Claude..."
+if ! command -v claude &> /dev/null; then
+    curl -fsSL https://claude.ai/install.sh | bash
+else
+    echo "Claude is already installed, skipping..."
+fi
+
+# Install Oh My Bash (unattended)
+echo "==> Installing Oh My Bash..."
+if [ ! -d "$HOME/.oh-my-bash" ]; then
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)" --unattended
+else
+    echo "Oh My Bash is already installed, skipping..."
+fi
+
+# Enable mise for Bash
+echo "==> Configuring mise for Bash..."
+BASHRC="$HOME/.bashrc"
+MISE_LINE='eval "$(mise activate bash)"'
+
+if ! grep -qF "$MISE_LINE" "$BASHRC"; then
+    echo "" >> "$BASHRC"
+    echo "# Enable mise" >> "$BASHRC"
+    echo "$MISE_LINE" >> "$BASHRC"
+    echo "mise configuration added to $BASHRC"
+else
+    echo "mise is already configured in $BASHRC, skipping..."
+fi
+
+# Enable and start Docker
+echo "==> Enabling and starting Docker..."
+sudo systemctl enable docker
+sudo systemctl start docker
+
+# Add user to docker group
+echo "==> Adding $USER to docker group..."
+if ! groups $USER | grep -q docker; then
+    sudo usermod -aG docker $USER
+    echo "User $USER added to docker group. You'll need to log out and back in for this to take effect."
+else
+    echo "User $USER is already in docker group, skipping..."
+fi
+
+echo ""
+echo "==> Bootstrap complete!"
+echo ""
+echo "Next steps:"
+echo "  1. Log out and back in (or run 'newgrp docker') to use Docker without sudo"
+echo "  2. Restart your terminal (or run 'source ~/.bashrc') to apply shell changes"
