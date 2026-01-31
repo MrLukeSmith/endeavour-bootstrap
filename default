@@ -6,7 +6,7 @@ echo "==> Starting EndeavourOS bootstrap..."
 
 # Install packages via pacman
 echo "==> Installing packages via pacman..."
-sudo pacman -S --needed --noconfirm git docker docker-compose curl bash-completion jq
+sudo pacman -S --needed --noconfirm git docker docker-compose curl bash-completion jq github-cli
 
 # Install packages via yay (AUR)
 echo "==> Installing AUR packages via yay..."

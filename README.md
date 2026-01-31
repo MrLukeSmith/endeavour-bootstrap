@@ -19,3 +19,4 @@ Basic, but effective.
 - VSCode
 - Lazydocker
 - Claude
+- Github CLI
